@@ -2,6 +2,7 @@
 """
 
     pygcm.request.manage
+    ~~~~~~~~~~~~~~~~~~~~
 
     Provides actual user shortcuts.
 
@@ -104,8 +105,8 @@ class GCMManager(object):
                 return False
         return True
 
-
-    def send_message(self, id, message, data=None):
+    def send_message(self, id, message, data=None, collapse_key=None,
+                    delay_while_idle=None, time_to_live=None):
         """This method uses default setting(with no additional args) 
         to send a message"""
         if isinstance(id, basestring):
