@@ -9,9 +9,8 @@
 """
 
 import json
-import urllib2
 
-from types import IntType
+from pygcm.compat import urllib2, basestring
 from pygcm.exception.exceptions import GCMException, ParamTypeError, \
     FatalError
 from pygcm.configs.base_config import PARAMS, SENDER_URL, \
@@ -49,12 +48,12 @@ class GCMManager(object):
         if not isinstance(api_key, basestring):
             raise GCMException("Invalid api key")
 
-        if not isinstance(split_num, IntType) or \
+        if not isinstance(split_num, int) or \
                 split_num > MAX_NUMBER_OF_TARGET:
             raise GCMException("Invalid split_num")
 
         self.split_num = split_num
-        self.retry = retry if isinstance(retry, IntType) \
+        self.retry = retry if isinstance(retry, int) \
                             else self.retry
         self.api_key = api_key
 
@@ -111,7 +110,7 @@ class GCMManager(object):
     def _send(self, request):
         try:
             request.post()
-        except urllib2.HTTPError, e:
+        except urllib2.HTTPError as e:
             if e.code in status_group.fail:
                 raise FatalError("Request failed with unexpected error")
 

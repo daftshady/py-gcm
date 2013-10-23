@@ -16,3 +16,4 @@ MAX_NUMBER_OF_TARGET = 1000
 CONTENT_TYPE = enum(PLAIN='test/plain', 
                     JSON='application/json')
 
+DEFAULT_ENCODING = 'utf8'

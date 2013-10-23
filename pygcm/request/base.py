@@ -9,12 +9,13 @@
 """
 
 import json
-import urllib2
 
 from collections import Iterable
+from pygcm.compat import urllib2, urlencode, basestring
 from pygcm.request.config import r_type
 from pygcm.configs.base_config import SENDER_URL, HEADERS, PARAMS, \
-                                MAX_NUMBER_OF_TARGET, CONTENT_TYPE
+                                MAX_NUMBER_OF_TARGET, CONTENT_TYPE, \
+                                DEFAULT_ENCODING
 
 class RequestHandler(object):
     """Requests wrapper 
@@ -61,9 +62,10 @@ class RequestHandler(object):
 
         if not self.ready:
             raise GCMException("RequestHandler not ready")
-
+        
+        p = params or self._params
         request = urllib2.Request(self._url,
-                        data=params or self._params,
+                        data=p.encode(DEFAULT_ENCODING),
                         headers=headers or self._headers)
         return urllib2.urlopen(request)
 
@@ -121,13 +123,13 @@ class RequestBuilder(object):
                 })
     
     def add_data(self, k, v):
-        self._data.update({k:v})
+        self._data.update({k : v})
     
     def add_message(self, msg):
         self.add_data('message', msg)
 
     def add_headers(self, k, v):
-        self._headers.update({k:v})
+        self._headers.update({k : v})
     
     def _remove_option(self, k):
         if self._params.get(k, None) is None:
@@ -142,8 +144,9 @@ class RequestBuilder(object):
     def build(self):
         self._clean_params()
         self._params.update({'data' : self._data})
+
         params = json.dumps(self._params) \
-            if self._is_json_request() else self._params
+            if self._is_json_request() else urlencode(self._params)
         return RequestHandler(url=self._url,
                                 headers=self._headers,
                                 params=params)
