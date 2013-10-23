@@ -4,7 +4,7 @@
     pygcm.compat
     ~~~~~~~~~~~~
 
-    Python 2.x and 3.x compatability
+    Python 2.x and 3.x compatibility
 
 """
 
