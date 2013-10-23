@@ -10,8 +10,9 @@
 
 import json
 import urllib2
-from pygcm.request.config import r_type
+
 from collections import Iterable
+from pygcm.request.config import r_type
 from pygcm.configs.base_config import SENDER_URL, HEADERS, PARAMS, \
                                 MAX_NUMBER_OF_TARGET, CONTENT_TYPE
 
@@ -22,9 +23,9 @@ class RequestHandler(object):
     def __init__(self, **kwargs):
         super(RequestHandler, self).__init__()
         self._url = kwargs.get('url', None)
-        self._headers = kwargs.get('headers', None) or {}
-        self._params = kwargs.get('params', None) or {}
-        self.proxies = kwargs.get('proxies', None)
+        self._headers = kwargs.get('headers', {})
+        self._params = kwargs.get('params', {})
+        self.proxies = kwargs.get('proxies', {})
         
         if self.proxies:
             if isinstance(self.proxies, dict):
@@ -46,10 +47,8 @@ class RequestHandler(object):
 
     @property
     def ready(self):
-        """Can add another 'ready' status like host is alive or not, is header proper.. etc """
-        return self._url is not None and \
-                self._params is not None and \
-                self._headers is not None
+        """Can add another 'ready' status """
+        return self._url is not None
 
     def _send(self, request_type, 
                 headers=None, params=None):
@@ -74,16 +73,6 @@ class RequestHandler(object):
     def post(self, headers=None, params=None):
         return self._send(r_type.post, headers=headers, params=params)
 
-    def put(self, headers=None, params=None):
-        return self._send(r_type.put, headers=headers, params=params)
-
-    def patch(self, headers=None, params=None):
-        return self._send(r_type.patch, headers=headers, params=params)
-
-    def delete(self):
-        return self._send(r._type.delete)
-
-
 class RequestBuilder(object):
     """RequestBuilder for GCM.
     Can add various data into request params."""
@@ -106,8 +95,10 @@ class RequestBuilder(object):
         self._construct_headers(auth_key, content_type)
 
     def _construct_headers(self, authorization, content_type):
-        self._headers.update({'Content-Type' : content_type,
-                            'Authorization' : authorization})
+        self._headers.update({
+                'Content-Type' : content_type,
+                'Authorization' : authorization
+                })
     
     def add_devices(self, ids):
         if not isinstance(ids, Iterable):
@@ -123,9 +114,11 @@ class RequestBuilder(object):
 
     def add_options(self, collapse_key=None, 
                     delay_while_idle=None, time_to_live=None):
-        self._params.update({'collapse_key' : collapse_key,
-                            'delay_while_idle' : delay_while_idle,
-                            'time_to_live' : time_to_live})
+        self._params.update({
+                'collapse_key' : collapse_key, 
+                'delay_while_idle' : delay_while_idle,
+                'time_to_live' : time_to_live
+                })
     
     def add_data(self, k, v):
         self._data.update({k:v})
