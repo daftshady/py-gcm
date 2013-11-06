@@ -63,7 +63,7 @@ class GCMManager(object):
         if not isinstance(id, basestring):
             raise ParamTypeError("Wrong id type")
 
-        self.multi_send(ids=[id], collapse_key=collapse_key,
+        return self.multi_send(ids=[id], collapse_key=collapse_key,
                         time_to_live=time_to_live, 
                         delay_while_idle=delay_while_idle,
                         data=data, message=message)
@@ -101,6 +101,8 @@ class GCMManager(object):
             if not success:
                 self._handle_retry(request)
 
+        return success
+ 
     def _handle_retry(self, request):
         for _ in range(self.retry):
             if self._send(request):
@@ -112,7 +114,7 @@ class GCMManager(object):
             request.post()
         except urllib2.HTTPError as e:
             if e.code in status_group.fail:
-                raise FatalError("Request failed with unexpected error")
+                raise FatalError("Request failed with unexpected error : code " + e.code)
 
             if e.code in status_group.retryable:
                 return False
@@ -120,13 +122,20 @@ class GCMManager(object):
 
     def send(self, id, message, data=None):
         """This method uses default setting(with no additional args) 
-        to send a message"""
+        to send a message
+        
+        TODO: Customized exception handling is difficult.
+        Should return more information instead of only returning
+        success status. """
+        success = False
+
         if isinstance(id, basestring):
-            self.single_send(id=id, message=message,
+            success = self.single_send(id=id, message=message,
                             data=data)
         elif isinstance(id, Iterable):
-            self.multi_send(ids=id, message=message,
+            success = self.multi_send(ids=id, message=message,
                             data=data)
         else:
             raise ParamTypeError("Wrong id type")
 
+        return success
