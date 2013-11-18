@@ -12,7 +12,12 @@ You can add some gcm options like `collapse_key` easily.
 py-gcm 0.1 runs on
 - Python (2.6, 2.7, 3.2, 3.3)
  
+Installation
+------------
 
+      $ pip install pygcm
+      
+      
 Usage
 -----
 
