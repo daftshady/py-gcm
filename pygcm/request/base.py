@@ -53,7 +53,7 @@ class RequestHandler(object):
 
     def _send(self, request_type, 
                 headers=None, params=None):
-        """Each send funtion sends a request. Returns :class:responseobject.
+        """Each send funtion sends a request.
         :param headers: should contains authorization header including api-key.
         :param params: should contains device key.(Others are options)
         """
