@@ -10,15 +10,15 @@
 
 import json
 
-from pygcm.compat import urllib2, basestring
-from pygcm.exception.exceptions import GCMException, ParamTypeError, \
-    FatalError
-from pygcm.configs.base_config import PARAMS, SENDER_URL, \
-    HEADERS, MAX_NUMBER_OF_TARGET
-from pygcm.request.base import RequestHandler, RequestBuilder
 from collections import Iterable
 from pygcm.common.utils import chunks
+from pygcm.compat import urllib2, basestring
 from pygcm.request.config import status_group
+from pygcm.exception.exceptions import (
+    GCMException, ParamTypeError, FatalError)
+from pygcm.configs.base_config import (
+    PARAMS, SENDER_URL, HEADERS, MAX_NUMBER_OF_TARGET)
+from pygcm.request.base import RequestHandler, RequestBuilder
 
 
 class GCMManager(object):

@@ -13,9 +13,10 @@ import json
 from collections import Iterable
 from pygcm.compat import urllib2, urlencode, basestring
 from pygcm.request.config import r_type
-from pygcm.configs.base_config import SENDER_URL, HEADERS, PARAMS, \
-                                MAX_NUMBER_OF_TARGET, CONTENT_TYPE, \
-                                DEFAULT_ENCODING
+from pygcm.configs.base_config import (
+    SENDER_URL, HEADERS, PARAMS, MAX_NUMBER_OF_TARGET, CONTENT_TYPE, 
+    DEFAULT_ENCODING
+    )
 
 class RequestHandler(object):
     """Requests wrapper 
