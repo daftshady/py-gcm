@@ -9,6 +9,7 @@
 """
 
 import sys
+
 try:
     import urllib2
 except ImportError:

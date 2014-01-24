@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 """
 
-    pygcm.exception.exceptions
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    pygcm.exceptions
+    ~~~~~~~~~~~~~~~~
     
     Define gcm related exceptions.
 
