@@ -6,8 +6,8 @@ Pygcm unittests
 """
 
 import unittest
-from pygcm.request.manage import GCMManager
-from pygcm.configs.base_config import MAX_NUMBER_OF_TARGET
+from pygcm.manage import GCMManager
+from pygcm.base_config import MAX_NUMBER_OF_TARGET
 
 
 class ManagerTest(unittest.TestCase):
