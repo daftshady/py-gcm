@@ -1,24 +1,24 @@
 # -*- coding:utf-8 -*-
 """
 
-    pygcm.request.manage
-    ~~~~~~~~~~~~~~~~~~~~
+    pygcm.manage
+    ~~~~~~~~~~~~
 
     Provides actual user shortcuts.
 
 """
 
 import json
-
 from collections import Iterable
-from pygcm.utils import chunks
 from pygcm.compat import urllib2, basestring
-from pygcm.config import status_group
 from pygcm.exceptions import (
     GCMException, ParamTypeError, FatalError)
-from pygcm.base_config import (
-    PARAMS, SENDER_URL, HEADERS, MAX_NUMBER_OF_TARGET)
-from pygcm.base import RequestHandler, RequestBuilder
+from pygcm.base_config import MAX_NUMBER_OF_TARGET
+from pygcm.request import RequestHandler, RequestBuilder
+
+
+def chunks(l, n):
+    return [l[i:i+n] for i in range(0, len(l), n)]
 
 
 class GCMManager(object):
@@ -110,15 +110,7 @@ class GCMManager(object):
         return False
 
     def _send(self, request):
-        try:
-            request.post()
-        except urllib2.HTTPError as e:
-            if e.code in status_group.fail:
-                raise FatalError("Request failed with unexpected error : code " + e.code)
-
-            if e.code in status_group.retryable:
-                return False
-        return True
+        return request.post()
 
     def send(self, id, message, data=None):
         """This method uses default setting(with no additional args) 

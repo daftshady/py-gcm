@@ -1,5 +1,5 @@
-# -*- coding:utf-8 -*-
-from pygcm.utils import enum
+def enum(**enums):
+    return type('Enum', (), enums)
 
 r_type = enum(
   post = 'POST',

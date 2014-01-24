@@ -1,29 +1,54 @@
 # -*- coding:utf-8 -*-
 """
 
-    pygcm.request.base
-    ~~~~~~~~~~~~~~~~~~
+    pygcm.request
+    ~~~~~~~~~~~~~
 
     Request related modules.
 
 """
 
 import json
-
 from collections import Iterable
+from pygcm.exceptions import GCMException
 from pygcm.compat import urllib2, urlencode, basestring
-from pygcm.request.config import r_type
-from pygcm.configs.base_config import (
-    SENDER_URL, HEADERS, PARAMS, MAX_NUMBER_OF_TARGET, CONTENT_TYPE, 
-    DEFAULT_ENCODING
+from pygcm.base_config import SENDER_URL, DEFAULT_ENCODING
+
+
+# HTTP request constants declaration
+def enum(**enums):
+    return type('Enum', (), enums)
+
+method = enum(
+    get = 'GET',
+    post = 'POST',
+    put = 'PUT',
+    delete = 'DELETE',
+    patch = 'PATCH'
     )
+
+status_code = enum(
+    success = 200,
+    invalid_field = 400,
+    auth_failed = 401,
+    internal_error = 500,
+    service_unavailable = 503
+    )
+
+status_group = enum(
+    fail = [status_code.auth_failed,
+            status_code.invalid_field],
+    success = [status_code.success],
+    retryable = [status_code.internal_error,
+                status_code.service_unavailable]
+    )
+
 
 class RequestHandler(object):
     """Requests wrapper 
     Handles requests holding specific configuation"""
 
     def __init__(self, **kwargs):
-        super(RequestHandler, self).__init__()
         self._url = kwargs.get('url', None)
         self._headers = kwargs.get('headers', {})
         self._params = kwargs.get('params', {})
@@ -55,10 +80,11 @@ class RequestHandler(object):
     def _send(self, request_type, 
                 headers=None, params=None):
         """Each send funtion sends a request.
+
         :param headers: should contains authorization header including api-key.
         :param params: should contains device key.(Others are options)
         """
-        if request_type != r_type.post:
+        if request_type != method.post:
             raise GCMException("Google does not support other methods yet")
 
         if not self.ready:
@@ -68,32 +94,51 @@ class RequestHandler(object):
         request = urllib2.Request(self._url,
                         data=p.encode(DEFAULT_ENCODING),
                         headers=headers or self._headers)
-        return urllib2.urlopen(request)
+
+        try:
+            urllib2.urlopen(request)
+        except urllib2.HTTPError as e:
+            if e.code in status_group.fail:
+                raise FatalError(
+                    "Request failed with unexpected error : code " + e.code)
+            if e.code in status_group.retryable:
+                return False
+            raise GCMException(e)
+
+        return True
 
     def get(self, headers=None, params=None):
-        return self._send(r_type.get, headers=headers, params=params)
+        return self._send(method.get, headers=headers, params=params)
 
     def post(self, headers=None, params=None):
-        return self._send(r_type.post, headers=headers, params=params)
+        return self._send(method.post, headers=headers, params=params)
+
 
 class RequestBuilder(object):
     """RequestBuilder for GCM.
     Can add various data into request params."""
+
+    _HEADERS = ['Content-Type', 'Authorization']
+    _PARAMS = [
+        'registration_ids', 'collapse_key',
+        'data', 'delay_while_idle', 'time_to_live'
+        ]
+    _CONTENT_TYPE_JSON = 'application/json'
 
     def __init__(self, api_key, content_type=None):
         """Initialize request builder.
         Auth key should be prefixed by 'key='.
         Default content type is 'json', 
         """
-        content_type = content_type or CONTENT_TYPE.JSON
+        content_type = content_type or self._CONTENT_TYPE_JSON
 
         if not isinstance(api_key, basestring):
             raise GCMException("Invalid api key")
         
         auth_key = 'key=' + api_key
         self._url = SENDER_URL
-        self._headers = dict.fromkeys(HEADERS, None)
-        self._params = dict.fromkeys(PARAMS, None)
+        self._headers = dict.fromkeys(self._HEADERS, None)
+        self._params = dict.fromkeys(self._PARAMS, None)
         self._data = dict()
         self._construct_headers(auth_key, content_type)
 
@@ -137,7 +182,7 @@ class RequestBuilder(object):
             self._params.pop(k, None)
     
     def _clean_params(self):
-        map(lambda k : self._remove_option(k), PARAMS)
+        map(lambda k : self._remove_option(k), self._PARAMS)
 
     def _get_content_type(self):
         return self._headers.get('Content-Type', '')
@@ -156,6 +201,6 @@ class RequestBuilder(object):
         return 'json' in self._get_content_type()
 
     def flush(self):
-        self._params = dict.fromkeys(PARAMS, None)
+        self._params = dict.fromkeys(self._PARAMS, None)
         self._data = dict()
 
