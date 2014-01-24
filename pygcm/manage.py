@@ -28,7 +28,7 @@ class GCMManager(object):
     
     Basic Usage::
         
-        >>> from pygcm.request.manage import GCMManager
+        >>> from pygcm.manage import GCMManager
         >>> m = GCMManager('__gcm api key provided by google__')
         >>> ids = ['android', 'device', 'keys']
         >>> m.send(ids, 'hello python!')
