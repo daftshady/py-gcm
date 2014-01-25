@@ -13,21 +13,11 @@ class GCMException(Exception):
     pass
 
 
-class InternalError(GCMException):
-    """GCM server has internal problem"""
-    pass
-
-
 class TemporalServerError(GCMException):
     """GCM server is temporally unavailable"""
     pass
 
 
 class ParamTypeError(GCMException):
-    """When GCM params has strange type"""
-    pass
-
-
-class FatalError(GCMException):
-    """When request to GCM has failed and our client has problem."""
+    """When GCM params has invalid form"""
     pass

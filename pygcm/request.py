@@ -49,7 +49,7 @@ class RequestHandler(object):
     Handles requests holding specific configuation"""
 
     def __init__(self, **kwargs):
-        self._url = kwargs.get('url', None)
+        self._url = kwargs.get('url')
         self._headers = kwargs.get('headers', {})
         self._params = kwargs.get('params', {})
         self.proxies = kwargs.get('proxies', {})
@@ -77,18 +77,17 @@ class RequestHandler(object):
         """Can add another 'ready' status """
         return self._url is not None
 
-    def _send(self, request_type, 
-                headers=None, params=None):
+    def _send(self, request_type, headers=None, params=None):
         """Each send funtion sends a request.
 
         :param headers: should contains authorization header including api-key.
-        :param params: should contains device key.(Others are options)
+        :param params: should contains device key. (Others are options)
         """
         if request_type != method.post:
             raise GCMException("Google does not support other methods yet")
 
         if not self.ready:
-            raise GCMException("RequestHandler not ready")
+            raise GCMException("RequestHandler is not ready to send")
         
         p = params or self._params
         request = urllib2.Request(self._url,
@@ -99,16 +98,13 @@ class RequestHandler(object):
             urllib2.urlopen(request)
         except urllib2.HTTPError as e:
             if e.code in status_group.fail:
-                raise FatalError(
+                raise GCMException(
                     "Request failed with unexpected error : code " + e.code)
             if e.code in status_group.retryable:
                 return False
             raise GCMException(e)
 
         return True
-
-    def get(self, headers=None, params=None):
-        return self._send(method.get, headers=headers, params=params)
 
     def post(self, headers=None, params=None):
         return self._send(method.post, headers=headers, params=params)
@@ -178,7 +174,7 @@ class RequestBuilder(object):
         self._headers.update({k : v})
     
     def _remove_option(self, k):
-        if self._params.get(k, None) is None:
+        if self._params.get(k) is None:
             self._params.pop(k, None)
     
     def _clean_params(self):
@@ -192,12 +188,13 @@ class RequestBuilder(object):
         self._params.update({'data' : self._data})
 
         params = json.dumps(self._params) \
-            if self._is_json_request() else urlencode(self._params)
+            if self._json_request() else urlencode(self._params)
         return RequestHandler(url=self._url,
                                 headers=self._headers,
                                 params=params)
     
-    def _is_json_request(self):
+    def _json_request(self):
+        """Returns True if request content type of request is json"""
         return 'json' in self._get_content_type()
 
     def flush(self):

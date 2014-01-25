@@ -11,8 +11,7 @@
 import json
 from collections import Iterable
 from pygcm.compat import urllib2, basestring
-from pygcm.exceptions import (
-    GCMException, ParamTypeError, FatalError)
+from pygcm.exceptions import GCMException, ParamTypeError
 from pygcm.base_config import MAX_NUMBER_OF_TARGET
 from pygcm.request import RequestHandler, RequestBuilder
 
