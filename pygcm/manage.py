@@ -52,8 +52,7 @@ class GCMManager(object):
             raise GCMException("Invalid split_num")
 
         self.split_num = split_num
-        self.retry = retry if isinstance(retry, int) \
-                            else self.retry
+        self.retry = retry if isinstance(retry, int) else self.retry
         self.api_key = api_key
 
     def single_send(self, id=None, collapse_key=None,
@@ -89,10 +88,8 @@ class GCMManager(object):
             for chunk in chunked_ids:
                 request = b.add_devices_and_rebuild(chunk)
                 success = self._send(request)
-                if not success and \
-                    not self._handle_retry(request):
+                if not success and not self._handle_retry(request):
                     break
-
         else:
             b.add_devices(ids)
             request = b.build()
