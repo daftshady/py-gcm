@@ -21,7 +21,7 @@ Installation
 Usage
 -----
 
-
+      >>> from pygcm.manage import GCMManager
       >>> m = GCMManager('sender_id_from_google')
       >>> ids = ['gcm', 'device', 'keys']
       >>> m.send(ids, 'message')
