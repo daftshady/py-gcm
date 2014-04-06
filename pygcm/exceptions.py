@@ -3,7 +3,7 @@
 
     pygcm.exceptions
     ~~~~~~~~~~~~~~~~
-    
+
     Define gcm related exceptions.
 
 """

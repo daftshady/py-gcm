@@ -24,25 +24,25 @@ class GCMManager(object):
     """GCMManager
     Provides the way to actually send request.
     User should use this class to access gcm.
-    
+
     Basic Usage::
-        
+
         >>> from pygcm.manage import GCMManager
         >>> m = GCMManager('__gcm api key provided by google__')
         >>> ids = ['android', 'device', 'keys']
         >>> m.send(ids, 'hello python!')
         >>> id = 'android_device_key'
         >>> m.send(id, 'hello python!')
-    
+
     """
-    
+
     retry = 3
 
-    def __init__(self, api_key=None, 
+    def __init__(self, api_key=None,
                 split_num=MAX_NUMBER_OF_TARGET, retry=None):
         """Initialize GCMManager
         split_num must not exceed MAX_NUMBER_OF_TARGET
-        Max number of device key that can be on request 
+        Max number of device key that can be on request
         at one go is fixed by google api."""
         if not isinstance(api_key, basestring):
             raise GCMException("Invalid api key")
@@ -62,7 +62,7 @@ class GCMManager(object):
             raise ParamTypeError("Wrong id type")
 
         return self.multi_send(ids=[id], collapse_key=collapse_key,
-                        time_to_live=time_to_live, 
+                        time_to_live=time_to_live,
                         delay_while_idle=delay_while_idle,
                         data=data, message=message)
 
@@ -71,7 +71,7 @@ class GCMManager(object):
             data=None, message=None):
         if not isinstance(ids, Iterable):
             raise ParamTypeError("Wrong ids type")
-        
+
         split = len(ids) > self.split_num
         b = RequestBuilder(self.api_key)
 
@@ -81,7 +81,7 @@ class GCMManager(object):
         b.add_whole_data(data)
         if message is not None:
             b.add_message(message)
-        
+
         success = False
         if split:
             chunked_ids = chunks(ids, self.split_num)
@@ -98,7 +98,7 @@ class GCMManager(object):
                 self._handle_retry(request)
 
         return success
- 
+
     def _handle_retry(self, request):
         for _ in range(self.retry):
             if self._send(request):
@@ -109,9 +109,9 @@ class GCMManager(object):
         return request.post()
 
     def send(self, id, message, data=None):
-        """This method uses default setting(with no additional args) 
+        """This method uses default setting(with no additional args)
         to send a message
-        
+
         TODO: Customized exception handling is difficult.
         Should return more information instead of only returning
         success status. """

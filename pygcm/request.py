@@ -45,7 +45,7 @@ status_group = enum(
 
 
 class RequestHandler(object):
-    """Requests wrapper 
+    """Requests wrapper
     Handles requests holding specific configuation"""
 
     def __init__(self, **kwargs):
@@ -53,13 +53,13 @@ class RequestHandler(object):
         self._headers = kwargs.get('headers', {})
         self._params = kwargs.get('params', {})
         self.proxies = kwargs.get('proxies', {})
-        
+
         if self.proxies:
             if isinstance(self.proxies, dict):
                 urllib2.install_opener(
                     urllib2.build_opener(
                         urllib2.ProxyHandler(self.proxies)))
-            
+
     @property
     def url(self):
         return self._url
@@ -88,7 +88,7 @@ class RequestHandler(object):
 
         if not self.ready:
             raise GCMException("RequestHandler is not ready to send")
-        
+
         p = params or self._params
         request = urllib2.Request(self._url,
                         data=p.encode(DEFAULT_ENCODING),
@@ -124,13 +124,13 @@ class RequestBuilder(object):
     def __init__(self, api_key, content_type=None):
         """Initialize request builder.
         Auth key should be prefixed by 'key='.
-        Default content type is 'json', 
+        Default content type is 'json'
         """
         content_type = content_type or self._CONTENT_TYPE_JSON
 
         if not isinstance(api_key, basestring):
             raise GCMException("Invalid api key")
-        
+
         auth_key = 'key=' + api_key
         self._url = SENDER_URL
         self._headers = dict.fromkeys(self._HEADERS, None)
@@ -143,12 +143,12 @@ class RequestBuilder(object):
                 'Content-Type' : content_type,
                 'Authorization' : authorization
                 })
-    
+
     def add_devices(self, ids):
         if not isinstance(ids, Iterable):
             raise GCMException("Should add list object in id params.")
         self._params.update({'registration_ids' : ids})
-    
+
     def add_whole_data(self, data):
         self._params.update({'data' : data})
 
@@ -156,27 +156,27 @@ class RequestBuilder(object):
         self.add_devices(ids)
         return self.build()
 
-    def add_options(self, collapse_key=None, 
+    def add_options(self, collapse_key=None,
                     delay_while_idle=None, time_to_live=None):
         self._params.update({
-                'collapse_key' : collapse_key, 
+                'collapse_key' : collapse_key,
                 'delay_while_idle' : delay_while_idle,
                 'time_to_live' : time_to_live
                 })
-    
+
     def add_data(self, k, v):
         self._data.update({k : v})
-    
+
     def add_message(self, msg):
         self.add_data('message', msg)
 
     def add_headers(self, k, v):
         self._headers.update({k : v})
-    
+
     def _remove_option(self, k):
         if self._params.get(k) is None:
             self._params.pop(k, None)
-    
+
     def _clean_params(self):
         map(lambda k : self._remove_option(k), self._PARAMS)
 
@@ -192,7 +192,7 @@ class RequestBuilder(object):
         return RequestHandler(url=self._url,
                                 headers=self._headers,
                                 params=params)
-    
+
     def _json_request(self):
         """Returns True if request content type of request is json"""
         return 'json' in self._get_content_type()
