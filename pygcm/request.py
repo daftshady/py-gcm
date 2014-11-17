@@ -99,7 +99,8 @@ class RequestHandler(object):
         except urllib2.HTTPError as e:
             if e.code in status_group.fail:
                 raise GCMException(
-                    "Request failed with unexpected error : code " + e.code)
+                    "Request failed with unexpected error: code " + str(e.code)
+                )
             if e.code in status_group.retryable:
                 return False
             raise GCMException(e)
