@@ -20,7 +20,7 @@ class ManagerTest(unittest.TestCase):
                 NXmbrxPN-48WSQlJIg
                 """
         self.message = 'pygcm test'
-    
+
     def test_single_send(self):
         success = self.m.send(self.id, self.message)
         self.assertTrue(success)
