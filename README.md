@@ -9,7 +9,7 @@ Supports some retry handling when gcm server is gone and provides automatic
 chunking when number of sender is larger than gcm limitation at one go.
 You can add some gcm options like `collapse_key` easily.
 
-py-gcm 0.1 runs on
+py-gcm 0.2 runs on
 - Python (2.6, 2.7, 3.2, 3.3)
  
 Installation
