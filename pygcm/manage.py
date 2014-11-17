@@ -4,7 +4,7 @@
     pygcm.manage
     ~~~~~~~~~~~~
 
-    Provides actual user shortcuts.
+    Provides external apis.
 
 """
 
@@ -55,13 +55,13 @@ class GCMManager(object):
         self.retry = retry if isinstance(retry, int) else self.retry
         self.api_key = api_key
 
-    def single_send(self, id=None, collapse_key=None,
+    def single_send(self, id_=None, collapse_key=None,
             time_to_live=None, delay_while_idle=None,
             data=None, message=None):
-        if not isinstance(id, basestring):
+        if not isinstance(id_, basestring):
             raise ParamTypeError("Wrong id type")
 
-        return self.multi_send(ids=[id], collapse_key=collapse_key,
+        return self.multi_send(ids=[id_], collapse_key=collapse_key,
                         time_to_live=time_to_live,
                         delay_while_idle=delay_while_idle,
                         data=data, message=message)
@@ -82,46 +82,51 @@ class GCMManager(object):
         if message is not None:
             b.add_message(message)
 
-        success = False
+        resps = []
+        def _wrap_send(req):
+            resp = self._send(req)
+            resp = self._handle_retry(req) if resp is None else resp
+            return resp
+
         if split:
             chunked_ids = chunks(ids, self.split_num)
             for chunk in chunked_ids:
-                request = b.add_devices_and_rebuild(chunk)
-                success = self._send(request)
-                if not success and not self._handle_retry(request):
-                    break
+                resps.append(
+                    _wrap_send(b.add_devices_and_rebuild(chunk))
+                )
         else:
             b.add_devices(ids)
-            request = b.build()
-            success = self._send(request)
-            if not success:
-                self._handle_retry(request)
-
-        return success
+            resps.append(_wrap_send(b.build()))
+        return resps
 
     def _handle_retry(self, request):
         for _ in range(self.retry):
-            if self._send(request):
-                return True
-        return False
+            resp = self._send(request)
+            if resp is not None:
+                break
+
+        if resp is not None:
+            return resp
+        raise GCMException('Failed to send a message')
 
     def _send(self, request):
         return request.post()
 
-    def send(self, id, message, data=None):
+    def send(self, id_, message, data=None, assert_success=False):
         """This method uses default setting(with no additional args)
         to send a message
+        Returns `list` of response `dict`.
 
         TODO: Customized exception handling is difficult.
         Should return more information instead of only returning
         success status. """
         success = False
 
-        if isinstance(id, basestring):
-            success = self.single_send(id=id, message=message,
+        if isinstance(id_, basestring):
+            success = self.single_send(id_=id_, message=message,
                             data=data)
-        elif isinstance(id, Iterable):
-            success = self.multi_send(ids=id, message=message,
+        elif isinstance(id_, Iterable):
+            success = self.multi_send(ids=id_, message=message,
                             data=data)
         else:
             raise ParamTypeError("Wrong id type")

@@ -79,6 +79,8 @@ class RequestHandler(object):
 
     def _send(self, request_type, headers=None, params=None):
         """Each send funtion sends a request.
+        If success, returns `dict` containing response information.
+        Returns `None` if retryable failure occured.
 
         :param headers: should contains authorization header including api-key.
         :param params: should contains device key. (Others are options)
@@ -90,22 +92,24 @@ class RequestHandler(object):
             raise GCMException("RequestHandler is not ready to send")
 
         p = params or self._params
-        request = urllib2.Request(self._url,
-                        data=p.encode(DEFAULT_ENCODING),
-                        headers=headers or self._headers)
+        request = urllib2.Request(
+            self._url,
+            data=p.encode(DEFAULT_ENCODING),
+            headers=headers or self._headers
+        )
 
         try:
-            urllib2.urlopen(request)
+            resp = urllib2.urlopen(request)
         except urllib2.HTTPError as e:
             if e.code in status_group.fail:
                 raise GCMException(
                     "Request failed with unexpected error: code " + str(e.code)
                 )
             if e.code in status_group.retryable:
-                return False
+                return None
             raise GCMException(e)
 
-        return True
+        return json.loads(resp.read())
 
     def post(self, headers=None, params=None):
         return self._send(method.post, headers=headers, params=params)
@@ -201,4 +205,3 @@ class RequestBuilder(object):
     def flush(self):
         self._params = dict.fromkeys(self._PARAMS, None)
         self._data = dict()
-
