@@ -17,7 +17,7 @@ requires = []
 
 setup(
     name='pygcm',
-    version='0.1',
+    version='0.3',
     packages=packages,
     package_data={'': ['LICENSE']},
     include_package_data=True,
